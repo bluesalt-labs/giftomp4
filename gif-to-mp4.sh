@@ -32,7 +32,7 @@
 ################################################################################
 
 # Make sure we're NOT root (do I need to do this?)
-if (( $EUID != 0 )); then
+if (( $EUID == 0 )); then
 	echo "Please do not run as root."
 	exit
 fi
@@ -58,14 +58,14 @@ function output_version() {
 
 function output_docs() {
 	#todo
-	output_version()
-	echo "usage (#todo)"
+	output_version
+	echo "usage (todo)"
 }
 
 function exit_with_error() {
 	if [ -z "$1" ]; then
 		printf >&2 "Unknown Error. Exiting.\n"; exit 1;
-	elif
+	else
 		printf >&2 "$1 Exiting.\n"; exit 1;
 	fi
 }
@@ -75,7 +75,7 @@ function exit_with_error() {
 
 # -- Set Default Variable Values --------------------------------------------- #
 
-cache_dir="~/gif-to-mp4-cache"
+cache_dir="$HOME"/gif-to-mp4-cache
 save_cache=0
 in_gif=""
 out_mp4=""
@@ -85,23 +85,27 @@ out_mp4=""
 
 # -- Get command Line Arguments ---------------------------------------------- #
 
-while [[ $# -gt 0]]
+while [[ $# -gt 0 ]]
 do
 	key="$1"
-	
-	case $key in
+
+	case "$key" in
 	-v|--version)
-		output_version()
-		exit 0;
+		output_version
+		exit 0
+		;;
 	-h|--help)
-		output_docs()
-		exit 0;
+		output_docs
+		exit 0
+		;;
 	-i|--input)
 		in_gif="$2"
+		shift
 		shift
 		;;
 	-o|--output)
 		out_mp4="$2"
+		shift
 		shift
 		;;
 	-c|--cache-dir)
@@ -110,9 +114,11 @@ do
 		;;
 	-s|--save-cache)
 		save_cache=1
+		shift
 		;;
 	*)
-		printf "Unknown option '%s'" $1
+		printf "Unknown option '%s'\n" $1
+		shift
 		;;
 	esac
 done
@@ -123,41 +129,42 @@ done
 
 # Check that the input file was specified
 if [ "$in_gif" == "" ]; then
-	exit_with_error("Must specify an input file.")
+	exit_with_error "Must specify an input file."
 fi
 
 # Check that the input file exists
-if [ ! -e "$in_gif"]; then
-	exit_with_error("Input file '$in_gif' does not exist.")
+if [ ! -e "$in_gif" ]; then
+	exit_with_error "Input file '$in_gif' does not exist."
 fi
 
 # Check that the input file is actually a gif
 in_file_type="$(file -ib "$in_gif")"
-if [ in_file_type != "image/gif; charset=binary"]; then
-	exit_with_error("Input file type '$in_file_type' is not valid (must be of type 'image/gif;').")
+if [ "$in_file_type" != "image/gif; charset=binary" ]; then
+	exit_with_error "Input file type '$in_file_type' is not valid (must be of type 'image/gif; charset=binary')."
 fi
 
 # Make sure the cache directory exists
-if [ -d "$cache_dir" ]; then
-	if [[ mkdir "$cache_dir" ]]; then
-		exit_with_error("Could not create the cache directory '$cache_dir'.")
+if [ ! -d "$cache_dir" ]; then
+	mkdir "$cache_dir"
+	if [ ! -d "$cache_dir" ]; then
+		exit_with_error "Could not create the cache directory '$cache_dir'."
 	fi
 fi
 
 # Set the default output file if it's not specified
-if [ "$out_mp4" == ""]; then
+if [ "$out_mp4" == "" ]; then
 	#out_mp4="$(dirname -z "$in_gif")/"
-	out_mp4="${in_gif%.*}.mp4"	
+	out_mp4="${in_gif%.*}.mp4"
 fi
 
 # Make sure the output file doesn't exist
 if [ -e "$out_mp4" ]; then
-	exit_with_error("Output file '$out_mp4' exists.")
+	exit_with_error "Output file '$out_mp4' exists."
 fi
 
 #todo? Make sure we can write to the output file
-	
-	
+
+
 # -- End Make Sure Everything Is In Order ------------------------------------ #
 
 
@@ -192,7 +199,7 @@ printf "%d picoseconds\n" $seconds
 
 # Calculate the framerate
 printf "Calculating framerate..."
-read framerate <<< $(( frames / seconds ))
+framerate=$(( frames / seconds ))
 printf "%d fps\n" $framerate
 
 echo "Still working on the actual conversion math. Stay tuned! Exiting."; exit 0;
