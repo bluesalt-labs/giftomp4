@@ -37,19 +37,6 @@ if (( $EUID == 0 )); then
 	exit
 fi
 
-# -- Check Dependencies ------------------------------------------------------ #
-
-# imagemagick must be installed, i.e. `apt-get install imagemagick`
-command -v convert >/dev/null 2>&1 || { printf >&2 "imagemagick is required but not installed! You can install it by typing:\n\tsudo apt-get install imagemagick\n"; exit 1; }
-#todo: make sure this doesn't log the user out when run. it logged me out when I tried to test it...
-
-# avconv must be installed, i.e. `apt-get install libav-tools`
-command -v avconv >/dev/null 2>&1 || { echo >&2 "avconv is required but not installed! You can install it by typing:\n\tsudo apt-get install libav-tools\n"; exit 1; }
-#todo: make sure this doesn't log the user out when run. it logged me out when I tried to test it...
-
-# -- End Check Dependencies -------------------------------------------------- #
-
-
 # -- Create Functions -------------------------------------------------------- #
 
 function output_version() {
@@ -84,6 +71,8 @@ out_mp4=""
 # -- End Set Default Variable Values ----------------------------------------- #
 
 # -- Get command Line Arguments ---------------------------------------------- #
+
+#todo: should I go through the arguments more than once to get file names, then get flags? 
 
 while [[ $# -gt 0 ]]
 do
@@ -124,6 +113,18 @@ do
 done
 
 # -- End Get Command Line Arguments ------------------------------------------ #
+
+# -- Check Dependencies ------------------------------------------------------ #
+
+# imagemagick must be installed, i.e. `apt-get install imagemagick`
+command -v convert >/dev/null 2>&1 || { printf >&2 "imagemagick is required but not installed! You can install it by typing:\n\tsudo apt-get install imagemagick\n"; exit 1; }
+#todo: make sure this doesn't log the user out when run. it logged me out when I tried to test it...
+
+# avconv must be installed, i.e. `apt-get install libav-tools`
+command -v avconv >/dev/null 2>&1 || { echo >&2 "avconv is required but not installed! You can install it by typing:\n\tsudo apt-get install libav-tools\n"; exit 1; }
+#todo: make sure this doesn't log the user out when run. it logged me out when I tried to test it...
+
+# -- End Check Dependencies -------------------------------------------------- #
 
 # -- Make Sure Everything Is In Order ---------------------------------------- #
 
